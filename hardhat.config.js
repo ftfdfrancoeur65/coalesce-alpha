@@ -24,10 +24,10 @@ const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "https://eth-rinkeby.alch
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "https://eth-kovan.alchemyapi.io/v2/your-api-key"
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL || "https://polygon-mumbai.alchemyapi.io/v2/your-api-key"
 const POLYGON_MAINNET_RPC_URL = process.env.POLYGON_MAINNET_RPC_URL || "https://polygon-mainnet.alchemyapi.io/v2/your-api-key"
-const MNEMONIC = process.env.MNEMONIC || "your mnemonic"
+const MNEMONIC = process.env.TEST_WALLET_PRIVATE_KEY || "your mnemonic"
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "Your etherscan API key"
 // optional
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "your private key"
+const PRIVATE_KEY = process.env.TEST_WALLET_PRIVATE_KEY || "your private key"
 
 module.exports = {
     defaultNetwork: "hardhat",
@@ -42,44 +42,38 @@ module.exports = {
         },
         kovan: {
             url: KOVAN_RPC_URL,
-             accounts: [PRIVATE_KEY],
-            //accounts: {
-           //     mnemonic: MNEMONIC,
-           // },
+            accounts: [PRIVATE_KEY],
             saveDeployments: true,
         },
         rinkeby: {
             url: RINKEBY_RPC_URL,
-            // accounts: [PRIVATE_KEY],
-            accounts: {
-                mnemonic: MNEMONIC,
-            },
-            saveDeployments: true,
-        },
-        ganache: {
-            url: 'http://localhost:8545',
-            accounts: {
-                mnemonic: MNEMONIC,
-            }
-        },
-        mainnet: {
-            url: MAINNET_RPC_URL,
-            // accounts: [PRIVATE_KEY],
-            accounts: {
-                mnemonic: MNEMONIC,
-            },
-            saveDeployments: true,
-        },
-        mumbai: {
-            url: MUMBAI_RPC_URL,
             accounts: [PRIVATE_KEY],
             saveDeployments: true,
         },
-        polygon: {
-            url: POLYGON_MAINNET_RPC_URL,
-            accounts: [PRIVATE_KEY],
-            saveDeployments: true,
-        },
+        // ganache: {
+        //     url: 'http://localhost:8545',
+        //     accounts: {
+        //         mnemonic: MNEMONIC,
+        //     }
+        // },
+        // mainnet: {
+        //     url: MAINNET_RPC_URL,
+        //     // accounts: [PRIVATE_KEY],
+        //     accounts: {
+        //         mnemonic: MNEMONIC,
+        //     },
+        //     saveDeployments: true,
+        // },
+        // mumbai: {
+        //     url: MUMBAI_RPC_URL,
+        //     accounts: [PRIVATE_KEY],
+        //     saveDeployments: true,
+        // },
+        // polygon: {
+        //     url: POLYGON_MAINNET_RPC_URL,
+        //     accounts: [PRIVATE_KEY],
+        //     saveDeployments: true,
+        // },
     },
     etherscan: {
         // Your API key for Etherscan

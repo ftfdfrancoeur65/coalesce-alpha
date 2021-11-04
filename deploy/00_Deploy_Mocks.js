@@ -7,6 +7,8 @@ module.exports = async ({
     const INITIAL_PRICE = '200000000000000000000'
     const { deploy, log } = deployments
     const { deployer } = await getNamedAccounts()
+    let accounts = await getNamedAccounts()
+    log("Deployer Address: ", deployer)
     const chainId = await getChainId()
     // If we are on a local development network, we need to deploy mocks!
     if (chainId == 31337) {
