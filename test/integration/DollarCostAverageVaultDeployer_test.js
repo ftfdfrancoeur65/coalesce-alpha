@@ -1,29 +1,78 @@
-const chai = require('chai')
-const { expect } = require('chai')
-const skipIf = require('mocha-skip-if')
-const BN = require('bn.js')
-chai.use(require('chai-bn')(BN))
-const { developmentChains } = require('../../helper-hardhat-config')
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+const networks = require('../config/networks.json');
+const { ChainId, Fetcher, WETH, Route, Trade, TokenAmount, Percent, TradeType } = require('@uniswap/sdk');
+const { BigNumber } = require("ethers");
 
-skip.if(developmentChains.includes(network.name)).
-  describe('RandomNumberConsumer Integration Tests', async function () {
-    console.log("NETWORK: ", network.name)
+describe("Vault", function () {
+  beforeEach(async function () {
+    const chainId = ChainId.MAINNET;
+    let dai;
+
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [networks.mainnet.test_wallet]
+    });
+
+    const signer = await ethers.provider.getSigner(networks.mainnet.test_wallet);
+
+    await network.provider.send("hardhat_setBalance", [
+      networks.mainnet.test_wallet,
+      ethers.utils.hexValue(ethers.utils.parseEther("2")._hex),
+    ]);
+
+    const daiData = await Fetcher.fetchTokenData(
+      chainId, networks.mainnet.dai, ethers.provider
+    );
+    const weth = WETH[chainId];
+    const pair = await Fetcher.fetchPairData(daiData, weth, ethers.provider);
+
+    const route = new Route([pair], weth);
+    const trade = new Trade(route, new TokenAmount(weth, ethers.utils.parseEther("1")), TradeType.EXACT_INPUT);
+    const slippageTolerance = new Percent('50', '10000');
+    const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw;
+
+    const uniswap = new ethers.Contract(
+      networks.mainnet.uniswap,
+      ['function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)'],
+      signer
+    );
+    const path = [weth.address, networks.mainnet.dai];
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+    const value = trade.inputAmount.raw;
+
+
+    const uniswapTx = await uniswap.swapExactETHForTokens(
+      amountOutMin.toString(),
+      path,
+      networks.mainnet.test_wallet,
+      deadline,
+      { value: value.toString(), gasPrice: 20e9 }
+    );
+
+    await uniswapTx.wait();
+  });
+
+  it("deployable", async function () {
+    const { deployer } = await getNamedAccounts()
+    const signer = await ethers.provider.getSigner(deployer);
+    let dai = (await ethers.getContractAt(
+      '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+      networks.mainnet.dai)).connect(signer);
+
+    let cDai = (await ethers.getContractAt(
+      '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+      networks.mainnet.cdai)).connect(signer);
+
+    let VaultDeployer = await ethers.getContractFactory("DollarCostAverageVaultDeployer");
+    VaultDeployer = VaultDeployer.connect(signer);
     
-    beforeEach(async () => {
-      const RandomNumberConsumer = await deployments.get('RandomNumberConsumer')
-      randomNumberConsumer = await ethers.getContractAt('RandomNumberConsumer', RandomNumberConsumer.address)
-    })
+    const SEVEN_DAYS_IN_SECONDS = 604800
+    const vaultDeployer = await VaultDeployer.deploy(SEVEN_DAYS_IN_SECONDS);
+    await vaultDeployer.deployed();
+    
+    expect(await vaultDeployer.owner()).to.equal(signer._address);
 
-    it('Should successfully make a VRF request and get a result', async () => {
-      const transaction = await randomNumberConsumer.getRandomNumber()
-      const tx_receipt = await transaction.wait()
-      const requestId = tx_receipt.events[2].topics[1]
 
-      //wait 60 secs for oracle to callback
-      await new Promise(resolve => setTimeout(resolve, 60000))
-
-      const result = await randomNumberConsumer.randomResult()
-      console.log("VRF Result: ", new ethers.BigNumber.from(result._hex).toString())
-      expect(new ethers.BigNumber.from(result._hex).toString()).to.be.a.bignumber.that.is.greaterThan(new ethers.BigNumber.from(0).toString())
-    })
-  })
+  });
+});
