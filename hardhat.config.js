@@ -19,7 +19,7 @@ require("@appliedblockchain/chainlink-plugins-fund-link")
 
 require('dotenv').config()
 
-const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "https://eth-mainnet.alchemyapi.io/v2/your-api-key"
+const MAINNET_RPC_URL = process.env.ALCHEMY_MAINNET_RPC_URL || "https://eth-mainnet.alchemyapi.io/v2/your-api-key"
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "https://eth-rinkeby.alchemyapi.io/v2/your-api-key"
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "https://eth-kovan.alchemyapi.io/v2/your-api-key"
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL || "https://polygon-mumbai.alchemyapi.io/v2/your-api-key"
@@ -34,7 +34,7 @@ module.exports = {
     networks: {
         hardhat: {
             forking: {
-                url: MAINNET_RPC_URL,
+                url: process.env.ALCHEMY_MAINNET_RPC_URL,
                 accounts: [PRIVATE_KEY],
                 blockNumber: 13553125
               }

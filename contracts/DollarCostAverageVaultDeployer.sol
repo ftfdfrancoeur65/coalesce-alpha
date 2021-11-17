@@ -2,8 +2,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "hardhat/console.sol";
 
@@ -11,12 +11,7 @@ import "./DollarCostAverageVault.sol";
 
 contract DollarCostAverageVaultDeployer is Ownable {
 
-    struct DollarCostAverageVault {
-      bool isActive;
-    }
-
-  mapping(address => DollarCostAverageVault) private DCAVaults;
-  address[] private activeDCAVaults;
+  DollarCostAverageVault[] private activeDCAVaults;
 
   uint public processingFee;
 
@@ -29,14 +24,21 @@ contract DollarCostAverageVaultDeployer is Ownable {
     lastBlockTimeStamp = block.timestamp;
   }
 
-  function checkUpkeep(bytes calldata ) external override returns (bool upkeepNeeded, bytes memory ) {
+  function newDCAVault(uint frequency, uint periods, address vaultDepositor)
+    public returns(address newVault){
+      DollarCostAverageVault vault = new DollarCostAverageVault(frequency, periods, vaultDepositor);
+      activeDCAVaults.push(vault);
+      newVault = address(vault);
+    }
+
+  function checkUpkeep(bytes calldata ) external returns (bool upkeepNeeded, bytes memory ) {
         upkeepNeeded = (block.timestamp - lastBlockTimeStamp) > minimumIntervalInSeconds;
     }
 
-  function performUpkeep(bytes calldata /* performData */) external override {
+  function performUpkeep(bytes calldata /* performData */) external {
       for (uint i = 0; i<activeDCAVaults.length; i++) {     
-        if(DCAVaults[activeDCAVaults[i]].isReady){
-          DCAVaults[activeDCAVaults[i]].processDCA;
+        if(activeDCAVaults[i].isReady()){
+          activeDCAVaults[i].processDCA();
         }
       }
   }

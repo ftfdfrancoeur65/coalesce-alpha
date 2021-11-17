@@ -1,20 +1,22 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const networks = require('../config/networks.json');
+const networks = require('../../config/networks.json');
 const { ChainId, Fetcher, WETH, Route, Trade, TokenAmount, Percent, TradeType } = require('@uniswap/sdk');
 const { BigNumber } = require("ethers");
 
 describe("Vault", function () {
+  let vaultDeployer;
+  let signer;
+
   beforeEach(async function () {
     const chainId = ChainId.MAINNET;
-    let dai;
 
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [networks.mainnet.test_wallet]
     });
 
-    const signer = await ethers.provider.getSigner(networks.mainnet.test_wallet);
+    signer = await ethers.provider.getSigner(networks.mainnet.test_wallet);
 
     await network.provider.send("hardhat_setBalance", [
       networks.mainnet.test_wallet,
@@ -47,32 +49,28 @@ describe("Vault", function () {
       path,
       networks.mainnet.test_wallet,
       deadline,
-      { value: value.toString(), gasPrice: 20e9 }
+      { value: value.toString()}
     );
 
     await uniswapTx.wait();
-  });
+    // const { deployer } = await getNamedAccounts()
+    // let dai = (await ethers.getContractAt(
+    //   '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+    //   networks.mainnet.dai)).connect(signer);
 
-  it("deployable", async function () {
-    const { deployer } = await getNamedAccounts()
-    const signer = await ethers.provider.getSigner(deployer);
-    let dai = (await ethers.getContractAt(
-      '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
-      networks.mainnet.dai)).connect(signer);
-
-    let cDai = (await ethers.getContractAt(
-      '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
-      networks.mainnet.cdai)).connect(signer);
+    // let cDai = (await ethers.getContractAt(
+    //   '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+    //   networks.mainnet.cdai)).connect(signer);
 
     let VaultDeployer = await ethers.getContractFactory("DollarCostAverageVaultDeployer");
     VaultDeployer = VaultDeployer.connect(signer);
     
     const SEVEN_DAYS_IN_SECONDS = 604800
-    const vaultDeployer = await VaultDeployer.deploy(SEVEN_DAYS_IN_SECONDS);
+    vaultDeployer = await VaultDeployer.deploy(SEVEN_DAYS_IN_SECONDS);
     await vaultDeployer.deployed();
-    
+  });
+
+  it("deployable", async function () {
     expect(await vaultDeployer.owner()).to.equal(signer._address);
-
-
   });
 });
