@@ -7,6 +7,8 @@ const { BigNumber } = require("ethers");
 describe("Vault", function () {
   let vaultDeployer;
   let signer;
+  const SEVEN_DAYS_IN_SECONDS = 604800
+  const TWELVE_WEEKS = 12
 
   beforeEach(async function () {
     const chainId = ChainId.MAINNET;
@@ -20,7 +22,7 @@ describe("Vault", function () {
 
     await network.provider.send("hardhat_setBalance", [
       networks.mainnet.test_wallet,
-      ethers.utils.hexValue(ethers.utils.parseEther("2")._hex),
+      ethers.utils.hexValue(ethers.utils.parseEther("300")._hex),
     ]);
 
     const daiData = await Fetcher.fetchTokenData(
@@ -53,24 +55,25 @@ describe("Vault", function () {
     );
 
     await uniswapTx.wait();
-    // const { deployer } = await getNamedAccounts()
-    // let dai = (await ethers.getContractAt(
-    //   '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
-    //   networks.mainnet.dai)).connect(signer);
-
-    // let cDai = (await ethers.getContractAt(
-    //   '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
-    //   networks.mainnet.cdai)).connect(signer);
 
     let VaultDeployer = await ethers.getContractFactory("DollarCostAverageVaultDeployer");
     VaultDeployer = VaultDeployer.connect(signer);
-    
-    const SEVEN_DAYS_IN_SECONDS = 604800
     vaultDeployer = await VaultDeployer.deploy(SEVEN_DAYS_IN_SECONDS);
     await vaultDeployer.deployed();
   });
 
   it("deployable", async function () {
     expect(await vaultDeployer.owner()).to.equal(signer._address);
+  });
+
+  it("can deploy new vault", async function () {
+    // let newVaultTx = await 
+    // let newVaultAddress = await newVaultTx.wait();
+
+    await expect(vaultDeployer.newDCAVault(SEVEN_DAYS_IN_SECONDS, TWELVE_WEEKS, signer._address))
+      .to.emit(vaultDeployer, 'NewVaultCreated')
+  
+    // let newVault = await ethers.getContractAt('DollarCostAverageVault', newVaultAddress)
+    // expect(await newVault.totalPeriods()).to.equal(TWELVE_WEEKS);
   });
 });

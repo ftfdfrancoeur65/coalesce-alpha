@@ -19,16 +19,20 @@ contract DollarCostAverageVaultDeployer is Ownable {
 
   uint public lastBlockTimeStamp;
 
+  event NewVaultCreated(
+    address indexed vaultAddress
+  );
+
   constructor(uint _minimumIntervalInSeconds) {
     minimumIntervalInSeconds = _minimumIntervalInSeconds;
     lastBlockTimeStamp = block.timestamp;
   }
 
-  function newDCAVault(uint frequency, uint periods, address vaultDepositor)
-    public returns(address newVault){
+  function newDCAVault(uint frequency, uint periods, address vaultDepositor) public{
       DollarCostAverageVault vault = new DollarCostAverageVault(frequency, periods, vaultDepositor);
       activeDCAVaults.push(vault);
-      newVault = address(vault);
+      console.log("THIS IS THE NEW VAULT ADDRESS: ", address(vault));
+      emit NewVaultCreated(address(vault));
     }
 
   function checkUpkeep(bytes calldata ) external returns (bool upkeepNeeded, bytes memory ) {
