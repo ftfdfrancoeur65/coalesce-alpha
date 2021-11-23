@@ -8,7 +8,7 @@ describe("Vault", function () {
   let vaultDeployer;
   let signer;
   const SEVEN_DAYS_IN_SECONDS = 604800
-  const TWELVE_WEEKS = 12
+  const ONE_WEEK = 1
   let newVault;
   let dai;
   let cDai;
@@ -71,25 +71,10 @@ describe("Vault", function () {
     await vaultDeployer.deployed();
   });
 
-  it("deployable", async function () {
-    expect(await vaultDeployer.owner()).to.equal(signer._address);
-  });
-
-  it("can deploy new vault", async function () {
-    await expect(
-      vaultDeployer.newDCAVault(
-        SEVEN_DAYS_IN_SECONDS,
-        TWELVE_WEEKS,
-        signer._address, networks.mainnet.dai,
-        networks.mainnet.weth
-      ))
-      .to.emit(vaultDeployer, 'NewVaultCreated')
-  });
-
   it("vault can be deposited in", async function () {
     let tx = await vaultDeployer.newDCAVault(
       SEVEN_DAYS_IN_SECONDS,
-      TWELVE_WEEKS,
+      ONE_WEEK,
       signer._address,
       networks.mainnet.dai,
       networks.mainnet.weth
@@ -101,31 +86,13 @@ describe("Vault", function () {
     newVault = await ethers.getContractAt('DollarCostAverageVault', args['vaultAddress'])
     await dai.approve(newVault.address, daiDepositAmount)
     let depositTx = await newVault.connect(signer).depositBase(daiDepositAmount)
-    await depositTx.wait()
-    walletBalanceOfDai = await dai.balanceOf(deployer)
-    expect(walletBalanceOfDai).to.eq(daiDepositAmount); 
-  });
-
-
-  it("is ready to be DCA'd", async function () {
-    expect(await newVault.isReady()).to.eq(true); 
+    await depositTx.wait() 
   });
 
   it("can DCA into a target when ready", async function () {
     let dcaTx = await vaultDeployer.performUpkeep();
     await dcaTx.wait();
     expect(weth.balanceOf(newVault.address)).to.eq(1000000)
-  });
-
-  it("not ready in between DCA periods", async function () {
-    expect(await newVault.isReady()).to.eq(false); 
-    expect(await newVault.lastDCAEventBlockTimeStamp()).to.not.eq(null); 
-  });
-
-  it("base can be withdrawn", async function () {
-    let withdrawTx = await newVault.withdrawBase(ethers.utils.parseUnits("60",18))
-    await withdrawTx.wait();
-    let newBalance = await dai.balanceOf(deployer.address)
-    expect(newBalance).to.eq(walletBalanceOfDai+ethers.utils.parseUnits("60",18))
+    expect(dai.balanceOf(newVault.address)).to.eq(0)
   });
 });

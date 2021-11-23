@@ -28,10 +28,9 @@ contract DollarCostAverageVaultDeployer is Ownable {
     lastBlockTimeStamp = block.timestamp;
   }
 
-  function newDCAVault(uint frequency, uint periods, address vaultDepositor) public{
-      DollarCostAverageVault vault = new DollarCostAverageVault(frequency, periods, vaultDepositor);
+  function newDCAVault(uint _frequency, uint _periods, address _vaultDepositor, IERC20 _underlying, IERC20 _target) public{
+      DollarCostAverageVault vault = new DollarCostAverageVault(_frequency, _periods, _vaultDepositor, _underlying, _target, _processingFee);
       activeDCAVaults.push(vault);
-      console.log("THIS IS THE NEW VAULT ADDRESS: ", address(vault));
       emit NewVaultCreated(address(vault));
     }
 
@@ -45,5 +44,9 @@ contract DollarCostAverageVaultDeployer is Ownable {
           activeDCAVaults[i].processDCA();
         }
       }
+  }
+
+  function setPerformanceFee(uint _amount) public onlyOwner {
+    processingFee = _amount;
   }
 }
