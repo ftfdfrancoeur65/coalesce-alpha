@@ -98,19 +98,21 @@ describe("Vault", function () {
     await dai.approve(newVault.address, daiDepositAmount)
     let depositTx = await newVault.connect(signer).depositBase(daiDepositAmount)
     await depositTx.wait()
-    walletBalanceOfDai = await dai.balanceOf(signer._address)
+    let vaultBalanceDaiBefore = await dai.balanceOf(newVault.address)
     expect(await dai.balanceOf(newVault.address)).to.eq(daiDepositAmount); 
     let dcaTx = await vaultDeployer.performUpkeep();
     await dcaTx.wait();
+    walletBalanceOfDai = await dai.balanceOf(signer._address)
     let wethBalanceInContract = await wethContract.balanceOf(newVault.address) 
 
     expect(wethBalanceInContract.toString()).to.eq('18412589450843102')  
     let lastDCABlockTimestamp = await newVault.lastDCAEventBlockTimeStamp()
 
-
-    // expect(await dai.balanceOfq(newVault.address)).to.not.eq(walletBalanceOfDai)  
+    let expectedDaiSwapAmount = vaultBalanceDaiBefore.div(12)
+    expect(await dai.balanceOf(newVault.address)).to.eq(vaultBalanceDaiBefore.sub(expectedDaiSwapAmount))  
     expect(lastDCABlockTimestamp.toString()).to.not.eq('0'); 
-    expect(await newVault.isReady()).to.eq(false); 
+    expect(await newVault.isReady()).to.eq(false);
+    expect(await newVault.periodsProcessed()).to.eq(1);
   });
 
   // it("base can be withdrawn", async function () {
