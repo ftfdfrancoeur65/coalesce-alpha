@@ -46,7 +46,7 @@ contract DollarCostAverageVault is Ownable {
   );
 
   modifier onlyDepositer {
-    require(msg.sender == address(depositer));
+    require(msg.sender == depositer, "Must be depositer");
     _;
   }
 
@@ -59,7 +59,6 @@ contract DollarCostAverageVault is Ownable {
     uint processingFee = calculateProcessingFee(amountToDCA);
     underlying.safeTransfer(deployer, processingFee);
     amountToDCA = amountToDCA - processingFee;
-    console.log("Amount to DCA: ", amountToDCA);
     address WETH = uniswapRouter.WETH();
     address[] memory path = new address[](3);
     if (address(underlying) == WETH || address(target) == WETH) {

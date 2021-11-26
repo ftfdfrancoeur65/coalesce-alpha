@@ -113,12 +113,9 @@ describe("Vault", function () {
     expect(lastDCABlockTimestamp.toString()).to.not.eq('0'); 
     expect(await newVault.isReady()).to.eq(false);
     expect(await newVault.periodsProcessed()).to.eq(1);
+    let withdrawTx = await newVault.connect(signer).withdrawBase(ethers.utils.parseUnits("60",18))
+    await withdrawTx.wait();
+    let newBalance = await dai.balanceOf(signer._address)
+    expect(newBalance).to.eq(walletBalanceOfDai.add(ethers.utils.parseUnits("60",18)))
   });
-
-  // it("base can be withdrawn", async function () {
-  //   let withdrawTx = await newVault.withdrawBase(ethers.utils.parseUnits("60",18))
-  //   await withdrawTx.wait();
-  //   let newBalance = await dai.balanceOf(deployer.address)
-  //   expect(newBalance).to.eq(walletBalanceOfDai+ethers.utils.parseUnits("60",18))
-  // });
 });
