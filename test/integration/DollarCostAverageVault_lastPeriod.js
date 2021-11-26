@@ -77,7 +77,8 @@ describe("Vault", function () {
       ONE_WEEK,
       signer._address,
       networks.mainnet.dai,
-      networks.mainnet.weth
+      networks.mainnet.weth,
+      0
     )
     let receipt = await tx.wait();
     let { args } = receipt.events?.filter((x) => { return x.event == "NewVaultCreated" })[0]
