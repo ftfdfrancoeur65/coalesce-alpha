@@ -27,7 +27,8 @@ const POLYGON_MAINNET_RPC_URL = process.env.POLYGON_MAINNET_RPC_URL || "https://
 const MNEMONIC = process.env.TEST_WALLET_PRIVATE_KEY || "your mnemonic"
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "Your etherscan API key"
 // optional
-const PRIVATE_KEY = process.env.TEST_WALLET_PRIVATE_KEY || "your private key"
+const PRIVATE_KEY = process.env.TEST_WALLET_PRIVATE_KEY
+const DEV_PRIVATE_KEY = process.env.DEV_TEST_WALLET_PK
 
 module.exports = {
     defaultNetwork: "hardhat",
@@ -38,6 +39,31 @@ module.exports = {
                 accounts: [PRIVATE_KEY],
                 blockNumber: 13553125
               }
+        },
+        matic: {
+            url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.POLYGON_MATIC_MAINNET}`,
+            accounts: [DEV_PRIVATE_KEY]
+          },
+        polygon_test: {
+            url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.POLYGON_TEST_API_KEY}`,
+            chainId: 80001,
+            // The address to use as default sender. If not present the first account of the node is used
+            //from: ,
+            // Its value should be "auto" or a number. If a number is used, it will be the gas limit used by default in every transaction.
+            // If "auto" is used, the gas limit will be automatically estimated. Default value: "auto"
+            gas: "auto",
+            // Its value should be "auto" or a number. This parameter behaves like gas. Default value: "auto"
+            gasPrice: "auto",
+            // A number used to multiply the results of gas estimation to give it some slack due to the uncertainty 
+            // of the estimation process. Default value: 1
+            //gasMultiplier: 1,
+            // This field controls which accounts Hardhat uses. It can use the node's accounts (by setting it to "remote"), a list
+            // of local accounts (by setting it to an array of hex-encoded private keys), or use an HD Wallet. Default value: "remote"
+            accounts: [PRIVATE_KEY],
+            // You can use this field to set extra HTTP Headers to be used when making JSON-RPC requests. It accepts a JavaScript
+            // object which maps header names to their values. Default value: undefined
+            //httpHeaders: '',
+            timeout: 20000
         },
         localhost: {
         },
@@ -79,7 +105,10 @@ module.exports = {
     etherscan: {
         // Your API key for Etherscan
         // Obtain one at https://etherscan.io/
-        apiKey: ETHERSCAN_API_KEY
+        apiKey: process.env.POLYGONSCAN_API_KEY
+    },
+    polygonscan:{
+        apiKey: process.env.POLYGONSCAN_API_KEY
     },
     namedAccounts: {
         deployer: {
