@@ -1,10 +1,11 @@
+//SPDX-License-Identifier: Unlicense
+
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ICToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
-import "hardhat/console.sol";
 
 contract DollarCostAverageVault is Ownable {
 
@@ -49,11 +50,8 @@ contract DollarCostAverageVault is Ownable {
     _;
   }
 
-  function isReady() external view returns(bool readyForProcessing){
-    readyForProcessing = (block.timestamp - lastDCAEventBlockTimeStamp) > DCAInterval;
-  }
-
   function processDCA() external {
+    require((block.timestamp - lastDCAEventBlockTimeStamp) > DCAInterval, "not ready for dca");
     uint amountToDCA = calculateAmountToDCA();
     uint processingFee = calculateProcessingFee(amountToDCA);
     underlying.safeTransfer(deployer, processingFee);
@@ -78,11 +76,21 @@ contract DollarCostAverageVault is Ownable {
     emit DCAEvent(address(this), amountToDCA, address(target));
   }
 
+  function isReady() external view returns(bool readyForProcessing){
+    readyForProcessing = (block.timestamp - lastDCAEventBlockTimeStamp) > DCAInterval;
+  }
+
   function calculateProcessingFee(uint _amount) public view returns(uint fee){
     fee = processingFeeRate / 10000 * _amount;
   }
 
+  function approveBaseDeposit(uint _amount) public {
+    require(underlying.approve(address(this), _amount),"Approval did not work");
+  }
+
   function depositBase(uint _amount) public payable {
+    uint256 allowance = underlying.allowance(msg.sender, address(this));
+    require(allowance >= _amount, "Check the token allowance");
     underlying.safeTransferFrom(msg.sender, address(this), _amount);
     emit newDeposit(address(this), msg.sender, _amount);
   }
@@ -95,7 +103,7 @@ contract DollarCostAverageVault is Ownable {
     target.safeTransfer(depositer, _amount);
   }
 
-  function calculateAmountToDCA() public payable returns(uint amountToDCA){
+  function calculateAmountToDCA() public view returns(uint amountToDCA){
     uint balanceUnderlying = underlying.balanceOf(address(this));
     if((totalPeriods - 1) == periodsProcessed){
       amountToDCA = balanceUnderlying;

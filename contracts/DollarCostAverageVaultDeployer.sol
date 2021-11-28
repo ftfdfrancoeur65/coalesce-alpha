@@ -1,3 +1,5 @@
+//SPDX-License-Identifier: Unlicense
+
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -39,7 +41,7 @@ contract DollarCostAverageVaultDeployer is Ownable {
       emit NewVaultCreated(address(vault));
     }
 
-  function checkUpkeep(bytes calldata ) external returns (bool upkeepNeeded, bytes memory ) {
+  function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory ) {
         upkeepNeeded = (block.timestamp - lastBlockTimeStamp) > minimumIntervalInSeconds;
     }
 

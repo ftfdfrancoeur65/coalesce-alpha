@@ -14,6 +14,7 @@ require("./tasks/price-consumer")
 require("./tasks/random-number-consumer")
 require("./tasks/price-consumer")
 require("./tasks/api-consumer")
+require("./tasks/vault-setup")
 require("./tasks/keepers")
 require("@appliedblockchain/chainlink-plugins-fund-link")
 

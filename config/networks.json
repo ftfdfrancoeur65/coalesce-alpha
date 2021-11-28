@@ -2,7 +2,8 @@
   "polygon":{
     "dai":"0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
     "weth": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-    "test_wallet_address": "0x4993eA3aaE13aAfc433Ad66fe756f91E253622CA"
+    "test_wallet_address": "0x4993eA3aaE13aAfc433Ad66fe756f91E253622CA",
+    "sushi_router": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506"
   },
   "mainnet":{
     "block_frequency": {
