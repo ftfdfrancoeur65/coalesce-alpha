@@ -84,14 +84,11 @@ contract DollarCostAverageVault is Ownable {
     fee = processingFeeRate / 10000 * _amount;
   }
 
-  function approveBaseDeposit(uint _amount) public {
-    require(underlying.approve(address(this), _amount),"Approval did not work");
-  }
-
   function depositBase(uint _amount) public payable {
     uint256 allowance = underlying.allowance(msg.sender, address(this));
     require(allowance >= _amount, "Check the token allowance");
     underlying.safeTransferFrom(msg.sender, address(this), _amount);
+    periodsProcessed = 0;
     emit newDeposit(address(this), msg.sender, _amount);
   }
 

@@ -96,11 +96,15 @@ describe("Vault", function () {
     let daiDepositAmount = ethers.utils.parseUnits("1000",18);
     newVault = await ethers.getContractAt('DollarCostAverageVault', args['vaultAddress'])
     await dai.approve(newVault.address, daiDepositAmount)
-    let depositTx = await newVault.connect(signer).depositBase(daiDepositAmount)
+    newVault = newVault.connect(signer)
+    let depositTx = await newVault.depositBase(daiDepositAmount)
     await depositTx.wait()
     let vaultBalanceDaiBefore = await dai.balanceOf(newVault.address)
     expect(await dai.balanceOf(newVault.address)).to.eq(daiDepositAmount); 
-    let dcaTx = await vaultDeployer.performUpkeep();
+    let upkeepArgs = ethers.utils.arrayify([0, 50])
+    console.log("BYTES: ", upkeepArgs)
+    console.log("IS BYTES: ", ethers.utils.isBytes(upkeepArgs));
+    let dcaTx = await vaultDeployer.performUpkeep(upkeepArgs);
     await dcaTx.wait();
     walletBalanceOfDai = await dai.balanceOf(signer._address)
     let wethBalanceInContract = await wethContract.balanceOf(newVault.address) 
