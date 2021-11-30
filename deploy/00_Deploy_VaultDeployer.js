@@ -1,4 +1,3 @@
-const { SamplePage } = require('twilio/lib/rest/autopilot/v1/assistant/task/sample');
 
 module.exports = async ({
   getNamedAccounts,

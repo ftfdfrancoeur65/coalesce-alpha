@@ -6,6 +6,7 @@
     "test": "hardhat test test/unit/PriceConsumerV3_unit_test.js --network hardhat && hardhat test test/unit/APIConsumer_unit_test.js --network hardhat && hardhat test test/unit/RandomNumberConsumer_unit_test.js --network hardhat && hardhat test test/unit/KeepersCounter_unit_test.js --network hardhat",
     "test-integration": "hardhat test test/integration/APIConsumer_int_test.js --network kovan && hardhat test test/integration/RandomNumberConsumer_int_test.js --network kovan",
     "lint": "eslint .",
+    "deploy": "hardhat deploy --network matic --export-all ../scaffold-eth/packages/react-app/src/contracts/hardhat_contracts.json",
     "lint:fix": "eslint . --fix"
   },
   "license": "MIT",

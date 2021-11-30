@@ -49,7 +49,8 @@ contract DollarCostAverageVaultDeployer is Ownable {
     numberOfVaults = activeDCAVaults.length;
   }
 
-  function performUpkeep() external {
+  function performUpkeep(bytes calldata performData) external {
+    // uint[] memory vaultRange = abi.decode(performData, (uint[]));
       for (uint i = 0; i<activeDCAVaults.length; i++) {     
         if(activeDCAVaults[i].isReady()){
           activeDCAVaults[i].processDCA();
