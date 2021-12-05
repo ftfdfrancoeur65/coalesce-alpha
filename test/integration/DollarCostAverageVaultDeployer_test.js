@@ -80,6 +80,13 @@ describe("Vault", function () {
     expect(await vaultDeployer.owner()).to.equal(signer._address);
   });
 
+  it("allows for adding a vault", async function () {
+    let addVaultTx = await vaultDeployer.addVaultAddress("0xd54C71868A4f5d34d59bE6c68d06E671b380668D")
+    await addVaultTx.wait();
+    let vaultStatus = await vaultDeployer.vaultAddresses("0xd54C71868A4f5d34d59bE6c68d06E671b380668D")
+    expect(vaultStatus).to.equal(true);
+  });
+
   it("can DCA into a target when ready", async function () {
     let tx = await vaultDeployer.newDCAVault(
       SEVEN_DAYS_IN_SECONDS,
@@ -109,7 +116,7 @@ describe("Vault", function () {
     walletBalanceOfDai = await dai.balanceOf(signer._address)
     let wethBalanceInContract = await wethContract.balanceOf(newVault.address) 
 
-    expect(wethBalanceInContract.toString()).to.eq('18412589450843102')  
+    expect(wethBalanceInContract).to.be.above(0)  
     let lastDCABlockTimestamp = await newVault.lastDCAEventBlockTimeStamp()
 
     let expectedDaiSwapAmount = vaultBalanceDaiBefore.div(12)
