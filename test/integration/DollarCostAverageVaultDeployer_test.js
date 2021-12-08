@@ -108,14 +108,13 @@ describe("Vault", function () {
     await depositTx.wait()
     let vaultBalanceDaiBefore = await dai.balanceOf(newVault.address)
     expect(await dai.balanceOf(newVault.address)).to.eq(daiDepositAmount); 
-    let upkeepArgs = ethers.utils.arrayify([0, 50])
-    console.log("BYTES: ", upkeepArgs)
-    console.log("IS BYTES: ", ethers.utils.isBytes(upkeepArgs));
-    let dcaTx = await vaultDeployer.performUpkeep(upkeepArgs);
+    let upkeepArgs = ethers.utils.toUtf8String(ethers.utils.arrayify([0, 50]))
+
+    const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(""));
+    let dcaTx = await vaultDeployer.performUpkeep(checkData);
     await dcaTx.wait();
     walletBalanceOfDai = await dai.balanceOf(signer._address)
     let wethBalanceInContract = await wethContract.balanceOf(newVault.address) 
-
     expect(wethBalanceInContract).to.be.above(0)  
     let lastDCABlockTimestamp = await newVault.lastDCAEventBlockTimeStamp()
 
