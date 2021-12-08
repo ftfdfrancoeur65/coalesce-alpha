@@ -15,7 +15,9 @@ import "./DollarCostAverageVault.sol";
 
 contract DollarCostAverageVaultDeployer is Ownable {
 
-  DollarCostAverageVault[] private activeDCAVaults;
+  DollarCostAverageVault[] public activeDCAVaults;
+
+  mapping(address => bool) public vaultAddresses;
 
   uint public processingFee;
 
@@ -29,6 +31,10 @@ contract DollarCostAverageVaultDeployer is Ownable {
     address indexed vaultAddress
   );
 
+  event VaultAdded(
+    address indexed vaultAddress
+  );
+
   constructor(uint _minimumIntervalInSeconds, IUniswapV2Router02 _uniswapRouter) {
     minimumIntervalInSeconds = _minimumIntervalInSeconds;
     lastBlockTimeStamp = block.timestamp;
@@ -38,8 +44,16 @@ contract DollarCostAverageVaultDeployer is Ownable {
   function newDCAVault(uint _frequency, uint _periods, address _vaultDepositor, IERC20 _underlying, IERC20 _target) public{
       DollarCostAverageVault vault = new DollarCostAverageVault(_frequency, _periods, _vaultDepositor, _underlying, _target, processingFee, uniswapRouter);
       activeDCAVaults.push(vault);
+      vaultAddresses[address(vault)] = true;
       emit NewVaultCreated(address(vault));
     }
+
+  function addVaultAddress(DollarCostAverageVault _vault) onlyOwner public {
+    require(vaultAddresses[address(_vault)] == false, "Already registered");
+    activeDCAVaults.push(_vault);
+    vaultAddresses[address(_vault)] = true;
+    emit VaultAdded(address(_vault));
+  }
 
   function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory ) {
         upkeepNeeded = (block.timestamp - lastBlockTimeStamp) > minimumIntervalInSeconds;
@@ -49,8 +63,8 @@ contract DollarCostAverageVaultDeployer is Ownable {
     numberOfVaults = activeDCAVaults.length;
   }
 
-  function performUpkeep(bytes calldata performData) external {
-    // uint[] memory vaultRange = abi.decode(performData, (uint[]));
+  function performUpkeep(bytes calldata /* performData */) external {
+
       for (uint i = 0; i<activeDCAVaults.length; i++) {     
         if(activeDCAVaults[i].isReady()){
           activeDCAVaults[i].processDCA();
